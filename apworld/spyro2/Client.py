@@ -716,6 +716,7 @@ class Spyro2Client(BizHawkClient):
             wtWarpReroute = readValues["wtWarpReroute"]
             wtDoorGem = readValues["wtDoorGem"]
             wtWallOrb = readValues["wtWallOrb"]
+            wtAny = readValues["wtAny"]
             invisibleAddress1 = readValues["invisibleAddress1"]
             invisibleAddress2 = readValues["invisibleAddress2"]
             destructiveAddress = readValues["destructiveAddress"]
@@ -999,7 +1000,7 @@ class Spyro2Client(BizHawkClient):
                     await bizhawk.write(ctx.bizhawk_ctx, levelLockWrites)
 
                 # ======== Winter Tundra Warp Handling ========
-                wtWarpReads = [wtWarpReroute, wtDoorGem, wtWallOrb]
+                wtWarpReads = [wtWarpReroute, wtDoorGem, wtWallOrb, wtAny]
                 wtWarpWrites = self.handleWinterWarpChanges(ctx, wtWarpReads)
                 if len(wtWarpWrites) > 0:
                     await bizhawk.write(ctx.bizhawk_ctx, wtWarpWrites)
@@ -1736,6 +1737,7 @@ class Spyro2Client(BizHawkClient):
         wtWarpReroute = wtWarpReads[0]
         wtDoorGem = wtWarpReads[1]
         wtWallOrb = wtWarpReads[2]
+        wtAny = wtWarpReads[3]
         warpOption = ctx.slot_data["options"]["wt_warp_options"]
 
         wtWarpWrites = []
@@ -1749,6 +1751,8 @@ class Spyro2Client(BizHawkClient):
             orbBit = pow(2, RAM.WTWallOrbBit)
             if wtWallOrb & orbBit != 0:
                 rerouteWarp = 1
+        if wtAny == WTWarpOptions.ANY:
+            rerouteWarp = 1
         if wtWarpReroute != rerouteWarp:
             wtWarpWrites += [(RAM.WTWarpAddress, (rerouteWarp).to_bytes(2, "little"), "MainRAM")]
 

@@ -76,7 +76,7 @@ class Logic(ABC):
         return self.can_satisfy_level_lock("Colossus", state)
 
     def can_enter_hurricos(self, state):
-        return self.can_access_summer_second_half(state) and self.can_satisfy_level_lock("Hurricos", state)
+        return self.can_access_summer_second_half(state, False) and self.can_satisfy_level_lock("Hurricos", state)
 
     def can_enter_aquaria(self, state):
         if self.world.options.enable_progressive_sparx_logic.value:
@@ -85,10 +85,10 @@ class Logic(ABC):
             return self.can_access_sf_past_aquaria_wall(state) and self.can_satisfy_level_lock("Aquaria Towers", state)
 
     def can_enter_sunny(self, state):
-        return self.can_access_summer_second_half(state) and self.can_satisfy_level_lock("Sunny Beach", state)
+        return self.can_access_summer_second_half(state, False) and self.can_satisfy_level_lock("Sunny Beach", state)
 
     def can_enter_ocean(self, state):
-        return self.can_access_summer_second_half(state) and \
+        return self.can_access_summer_second_half(state, False) and \
             self.can_satisfy_level_lock("Ocean Speedway", state) and \
             (
                     state.has("Orb", self.world.player, 3) or
@@ -101,7 +101,7 @@ class Logic(ABC):
         # While there are several ways to skip into Crush early,
         # the player has chosen not to be in open world, so there's no reason
         # to add tricks for these skips.
-        return self.can_access_summer_second_half(state) and \
+        return self.can_access_summer_second_half(state, False) and \
             has_sufficient_sparx and \
             (
                 is_open_world or
@@ -143,7 +143,7 @@ class Logic(ABC):
         return state.has("Orb", self.world.player, 6) and self.can_satisfy_level_lock("Metro Speedway", state)
 
     def can_enter_scorch(self, state):
-        if not self.can_access_autumn_second_half(state):
+        if not self.can_access_autumn_second_half(state, False):
             return False
         if self.world.options.enable_progressive_sparx_logic.value:
             return self.can_satisfy_level_lock("Scorch", state) and self.has_sparx_health(1, state)
@@ -167,7 +167,7 @@ class Logic(ABC):
             return self.can_satisfy_level_lock("Magma Cone", state)
 
     def can_enter_fracture(self, state):
-        if not self.can_access_autumn_second_half(state):
+        if not self.can_access_autumn_second_half(state, False):
             return False
         if self.world.options.enable_progressive_sparx_logic.value:
             return self.can_satisfy_level_lock("Fracture Hills", state) and self.has_sparx_health(1, state)
@@ -201,7 +201,7 @@ class Logic(ABC):
             if not self.has_sparx_health(2, state):
                 return False
         return state.has("Orb", self.world.player, 15) or \
-            self.can_access_winter_second_half(state) and \
+            self.can_access_winter_second_half(state, False) and \
             (
                 hasattr(self, "logic_wt_oob_double_jump") and self.logic_wt_oob_double_jump and self.can_double_jump(state) or
                 hasattr(self, "logic_wt_oob_nothing") and self.logic_wt_oob_nothing
@@ -216,7 +216,7 @@ class Logic(ABC):
             (
                 self.can_bypass_moneybags(state) or
                 state.has("Moneybags Unlock - Canyon Speedway Portal", self.world.player) or
-                self.can_access_winter_second_half(state) and
+                self.can_access_winter_second_half(state, False) and
                 (
                     hasattr(self, "logic_wt_oob_double_jump") and self.logic_wt_oob_double_jump and self.can_double_jump(state) or
                     hasattr(self, "logic_wt_oob_nothing") and self.logic_wt_oob_nothing
@@ -228,7 +228,7 @@ class Logic(ABC):
             )
 
     def can_enter_robotica(self, state):
-        if not self.can_access_winter_second_half(state):
+        if not self.can_access_winter_second_half(state, False):
             return False
         if self.world.options.enable_progressive_sparx_logic.value:
             return self.can_satisfy_level_lock("Robotica Farms", state) and self.has_sparx_health(2, state)
@@ -241,7 +241,7 @@ class Logic(ABC):
         if self.world.options.enable_progressive_sparx_logic.value:
             if not self.has_sparx_health(2, state):
                 return False
-        return self.can_access_winter_second_half(state) and \
+        return self.can_access_winter_second_half(state, False) and \
             (
                 state.has("Orb", self.world.player, 25) or
                 (
@@ -264,7 +264,7 @@ class Logic(ABC):
 
         if not self.can_satisfy_level_lock("Dragon Shores", state):
             return False
-        return self.can_access_winter_second_half(state) and \
+        return self.can_access_winter_second_half(state, False) and \
             (
                 (
                     hasattr(self, "logic_wt_oob_double_jump") and self.logic_wt_oob_double_jump and self.can_double_jump(state) or
@@ -281,13 +281,16 @@ class Logic(ABC):
         return self.can_swim(state) or \
             hasattr(self, "logic_sf_ledge_double_jump") and self.logic_sf_ledge_double_jump and self.can_double_jump(state)
 
-    def can_access_summer_second_half(self, state):
-        return self.can_swim(state) or \
-            hasattr(self, "logic_sf_second_half_double_jump") and self.logic_sf_second_half_double_jump and self.can_double_jump(state) or \
-            hasattr(self, "logic_sf_second_half_nothing") and self.logic_sf_second_half_nothing
+    def can_access_summer_second_half(self, state, from_homeworld):
+        # print(f"SF second half:", self.can_swim(state) or hasattr(self, "logic_sf_second_half_double_jump") and self.logic_sf_second_half_double_jump and self.can_double_jump(state) or hasattr(self, "logic_sf_second_half_nothing") and self.logic_sf_second_half_nothing or not from_homeworld and self.world.options.enable_open_world and self.world.options.open_world_warp_unlocks and (self.can_access_autumn_second_half(state, True) or self.can_access_winter_second_half(state, True)))
+
+        return (self.can_swim(state) or
+                hasattr(self, "logic_sf_second_half_double_jump") and self.logic_sf_second_half_double_jump and self.can_double_jump(state) or
+                hasattr(self, "logic_sf_second_half_nothing") and self.logic_sf_second_half_nothing) or \
+                not from_homeworld and self.world.options.enable_open_world and self.world.options.open_world_warp_unlocks and (self.can_access_autumn_second_half(state, True) or self.can_access_winter_second_half(state, True))
 
     def can_access_sf_ladder(self, state):
-        return self.can_access_summer_second_half(state) and \
+        return self.can_access_summer_second_half(state, False) and \
             (
                 self.can_climb(state) or
                 hasattr(self, "logic_sf_swim_in_air") and self.logic_sf_swim_in_air and self.can_swim(state) or
@@ -295,7 +298,7 @@ class Logic(ABC):
             )
 
     def can_access_sf_past_aquaria_wall(self, state):
-        return self.can_access_summer_second_half(state) and \
+        return self.can_access_summer_second_half(state, False) and \
             (
                 hasattr(self, "logic_sf_swim_in_air") and self.logic_sf_swim_in_air and self.can_swim(state) or
                 hasattr(self, "logic_sf_aquaria_wall_double_jump") and self.logic_sf_aquaria_wall_double_jump and self.can_double_jump(state) or
@@ -453,24 +456,30 @@ class Logic(ABC):
             hasattr(self, "logic_ap_zephyr_double_jump") and self.logic_ap_zephyr_double_jump and self.can_double_jump(state)
 
     def can_access_autumn_wall(self, state):
-        # Or a proxy, at a later date.
-        return state.has("Orb", self.world.player, 6) or \
-            self.can_pass_autumn_door(state) or \
-            hasattr(self, "logic_ap_zephyr_double_jump") and self.logic_ap_zephyr_double_jump and self.can_double_jump(state)
+        # PhoenixAki: unless I'm crazy, it's very easy to glide and hover over to the wall from the Zephyr platform. A little tight,
+        # but absolutely what I'd consider to be within reason for a casual player to do if they saw that it was in logic
+        return True
+        # return state.has("Orb", self.world.player, 6) or \
+        #     self.can_pass_autumn_door(state) or \
+        #     hasattr(self, "logic_ap_zephyr_double_jump") and self.logic_ap_zephyr_double_jump and self.can_double_jump(state)
 
-    def can_access_autumn_second_half(self, state):
-        # Or double frog proxy.
+    def can_access_autumn_second_half(self, state, from_homeworld):
+        # print(f"AP second half:", self.can_climb(state) or hasattr(self, "logic_ap_climb_skip") and self.logic_ap_climb_skip and self.can_double_jump(state) or not from_homeworld and self.world.options.enable_open_world and self.world.options.open_world_warp_unlocks and (self.can_access_summer_second_half(state, True) or self.can_access_winter_second_half(state, True)))
+
         return self.can_climb(state) or \
-            hasattr(self, "logic_ap_climb_skip") and self.logic_ap_climb_skip and self.can_double_jump(state)
+            hasattr(self, "logic_ap_climb_skip") and self.logic_ap_climb_skip and self.can_double_jump(state) or \
+            not from_homeworld and self.world.options.enable_open_world and self.world.options.open_world_warp_unlocks and (self.can_access_summer_second_half(state, True) or self.can_access_winter_second_half(state, True))
 
     def can_pass_autumn_door(self, state):
-        # Or double frog proxy.
-        return self.can_access_autumn_second_half(state) and \
-            (
-                state.has("Orb", self.world.player, 8) or
-                hasattr(self, "logic_ap_door_skip") and self.logic_ap_door_skip and self.can_double_jump(state) or
+        if self.world.options.enable_open_world and self.world.options.open_world_warp_unlocks:
+            # print(f"AP door open world:", self.can_access_autumn_second_half(state, True) or self.can_access_summer_second_half(state, True) or self.can_access_winter_second_half(state, True))
+            return self.can_access_autumn_second_half(state, True) or self.can_access_summer_second_half(state, True) or self.can_access_winter_second_half(state, True)
+        else:
+            # print(f"AP door non-open world:", self.can_access_autumn_second_half(state, True) and state.has("Orb", self.world.player, 8) or hasattr(self, "logic_ap_door_skip") and self.logic_ap_door_skip and self.can_double_jump(state) or hasattr(self, "logic_ap_climb_skip") and self.logic_ap_climb_skip and self.can_double_jump(state))
+            return self.can_access_autumn_second_half(state, True) and \
+                state.has("Orb", self.world.player, 8) or \
+                hasattr(self, "logic_ap_door_skip") and self.logic_ap_door_skip and self.can_double_jump(state) or \
                 hasattr(self, "logic_ap_climb_skip") and self.logic_ap_climb_skip and self.can_double_jump(state)
-            )
 
     def can_access_autumn_shady_section(self, state):
         return self.can_pass_autumn_door(state) and \
@@ -545,13 +554,16 @@ class Logic(ABC):
     def can_access_fracture_enemies(self, state):
         return self.world.options.fracture_easy_earthshapers.value or self.can_fireball(state) or self.can_access_fracture_hunter(state)
 
-    def can_access_winter_second_half(self, state):
+    def can_access_winter_second_half(self, state, from_homeworld):
+        # print(f"WT second half:", self.can_headbash(state) or hasattr(self, "logic_wt_castle_double_jump") and self.logic_wt_castle_double_jump and self.can_double_jump(state) or hasattr(self, "logic_wt_castle_penguin_proxy") and self.logic_wt_castle_penguin_proxy or not from_homeworld and self.world.options.enable_open_world and self.world.options.open_world_warp_unlocks and (self.can_access_summer_second_half(state, True) or self.can_access_autumn_second_half(state, True)))
+
         return self.can_headbash(state) or \
             hasattr(self, "logic_wt_castle_double_jump") and self.logic_wt_castle_double_jump and self.can_double_jump(state) or \
-            hasattr(self, "logic_wt_castle_penguin_proxy") and self.logic_wt_castle_penguin_proxy
+            hasattr(self, "logic_wt_castle_penguin_proxy") and self.logic_wt_castle_penguin_proxy or \
+            not from_homeworld and self.world.options.enable_open_world and self.world.options.open_world_warp_unlocks and (self.can_access_summer_second_half(state, True) or self.can_access_autumn_second_half(state, True))
 
     def can_access_winter_waterfall(self, state):
-        return self.can_access_winter_second_half(state) and \
+        return self.can_access_winter_second_half(state, False) and \
             (
                 self.can_swim(state) or
                 hasattr(self, "logic_wt_oob_double_jump") and self.logic_wt_oob_double_jump and self.can_double_jump(state) or
@@ -569,7 +581,7 @@ class Logic(ABC):
             )
 
     def can_access_ripto(self, state):
-        return self.can_access_winter_second_half(state) and \
+        return self.can_access_winter_second_half(state, False) and \
             (
                 state.has("Orb", self.world.player, self.world.options.ripto_door_orbs.value) or
                 (

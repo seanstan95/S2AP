@@ -47,6 +47,7 @@ class WTWarpOptions:
     VANILLA = 0
     DOOR = 1
     WALL_ORB = 2
+    ANY = 3
 
 class AbilityOptions:
     VANILLA = 0
@@ -136,7 +137,8 @@ class EnableOpenWorld(Toggle):
     """If on, Crush and Gulp do not require talismans.
     Removes talisman items from the pool.
     Effectively allows early access to each homeworld,
-    though swim and climb may logicially lock progression."""
+    though swim and climb may logicially lock progression.
+    The Professor's door in Autumn Plains is forced open."""
     display_name = "Enable Open World"
 
 class LevelLockOption(Choice):
@@ -181,12 +183,14 @@ class WTWarpOption(Choice):
     Door: Warps inside the castle if you have unlocked the
         door with headbash.
     Wall Orb: Warps inside the castle if you have the WT wall orb.
+    Any: Warps always go to inside the castle.
     """
     display_name = "Winter Tundra Inner Warp"
     default = WTWarpOptions.VANILLA
     option_vanilla = WTWarpOptions.VANILLA
     option_door = WTWarpOptions.DOOR
     option_wall_orb = WTWarpOptions.WALL_ORB
+    option_any = WTWarpOptions.ANY
 
 class Enable25PctGemChecksOption(Toggle):
     """Adds checks for getting 25% of the gems in a level"""
