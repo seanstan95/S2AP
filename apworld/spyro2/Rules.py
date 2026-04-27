@@ -383,13 +383,13 @@ def get_level_rules(logic: Logic):
             None,
             {
                 "Autumn Plains: The end of the wall": lambda state: logic.can_access_autumn_wall(state),
-                "Autumn Plains: Long glide!": lambda state: logic.can_pass_autumn_door(state)
+                "Autumn Plains: Long glide!": lambda state: logic.can_pass_autumn_door(state, False)
             },
             {
                 "Autumn Plains: Moneybags Unlock: Zephyr Portal": None,
                 "Autumn Plains: Moneybags Unlock: Climb": None,
-                "Autumn Plains: Moneybags Unlock: Shady Oasis Portal": lambda state: logic.can_pass_autumn_door(state),
-                "Autumn Plains: Moneybags Unlock: Icy Speedway Portal": lambda state: logic.can_pass_autumn_door(state)
+                "Autumn Plains: Moneybags Unlock: Shady Oasis Portal": lambda state: logic.can_pass_autumn_door(state, False),
+                "Autumn Plains: Moneybags Unlock: Icy Speedway Portal": lambda state: logic.can_pass_autumn_door(state, False)
             },
             {"Autumn Plains: Life Bottle": lambda state: logic.can_access_autumn_second_half(state, False)},
             {},
@@ -424,7 +424,7 @@ def get_level_rules(logic: Logic):
                     GemRuleRestriction(
                         [48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 99, 100, 101, 122],
                         "access to beyond the Professor's door",
-                        lambda state: logic.can_pass_autumn_door(state),
+                        lambda state: logic.can_pass_autumn_door(state, False),
                         202
                     ),
                     GemRuleRestriction(

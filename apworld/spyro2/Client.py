@@ -716,7 +716,7 @@ class Spyro2Client(BizHawkClient):
             wtWarpReroute = readValues["wtWarpReroute"]
             wtDoorGem = readValues["wtDoorGem"]
             wtWallOrb = readValues["wtWallOrb"]
-            wtAny = readValues["wtAny"]
+            wtAlways = readValues["wtAlways"]
             invisibleAddress1 = readValues["invisibleAddress1"]
             invisibleAddress2 = readValues["invisibleAddress2"]
             destructiveAddress = readValues["destructiveAddress"]
@@ -993,6 +993,11 @@ class Spyro2Client(BizHawkClient):
                 if len(openWorldWrites) > 0:
                     await bizhawk.write(ctx.bizhawk_ctx, openWorldWrites)
 
+                # =======  Professor's Door Handling ========
+                professorDoorWrites = self.handleProfessorDoorChanges(ctx)
+                if len(professorDoorWrites) > 0:
+                    await bizhawk.write(ctx.bizhawk_ctx, professorDoorWrites)
+
                 # ======== Level Lock Handling ========
                 levelLockReads = [currentLevel]
                 levelLockWrites = self.handleLevelLockChanges(ctx, levelLockReads)
@@ -1000,7 +1005,7 @@ class Spyro2Client(BizHawkClient):
                     await bizhawk.write(ctx.bizhawk_ctx, levelLockWrites)
 
                 # ======== Winter Tundra Warp Handling ========
-                wtWarpReads = [wtWarpReroute, wtDoorGem, wtWallOrb, wtAny]
+                wtWarpReads = [wtWarpReroute, wtDoorGem, wtWallOrb, wtAlways]
                 wtWarpWrites = self.handleWinterWarpChanges(ctx, wtWarpReads)
                 if len(wtWarpWrites) > 0:
                     await bizhawk.write(ctx.bizhawk_ctx, wtWarpWrites)
@@ -1634,6 +1639,12 @@ class Spyro2Client(BizHawkClient):
                     openWorldWrites += [(RAM.WinterGuidebookUnlock, (1).to_bytes(1, "little"), "MainRAM")]
         return openWorldWrites
 
+    def handleProfessorDoorChanges(selfself, ctx):
+        professor_door_writes = []
+        if ctx.slot_data["options"]["open_professor_door"]:
+            professor_door_writes += [(RAM.ProfessorDoorAddress, (1).to_bytes(1, "little"), "MainRAM")]
+        return professor_door_writes
+
     def handleLevelLockChanges(self, ctx, levelLockReads):
         currentLevel = levelLockReads[0]
         levelLockOptions = ctx.slot_data["options"]["level_lock_options"]
@@ -1737,7 +1748,7 @@ class Spyro2Client(BizHawkClient):
         wtWarpReroute = wtWarpReads[0]
         wtDoorGem = wtWarpReads[1]
         wtWallOrb = wtWarpReads[2]
-        wtAny = wtWarpReads[3]
+        wtAlways = wtWarpReads[3]
         warpOption = ctx.slot_data["options"]["wt_warp_options"]
 
         wtWarpWrites = []
@@ -1751,7 +1762,7 @@ class Spyro2Client(BizHawkClient):
             orbBit = pow(2, RAM.WTWallOrbBit)
             if wtWallOrb & orbBit != 0:
                 rerouteWarp = 1
-        if wtAny == WTWarpOptions.ANY:
+        if wtAlways == WTWarpOptions.ALWAYS:
             rerouteWarp = 1
         if wtWarpReroute != rerouteWarp:
             wtWarpWrites += [(RAM.WTWarpAddress, (rerouteWarp).to_bytes(2, "little"), "MainRAM")]

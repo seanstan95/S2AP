@@ -932,9 +932,9 @@ public partial class App : Application
             HandleMoneybagsUnlocks();
             HandleInnerWTWarpAccess();
 
-            //PhoenixAki addition: open professor's door in AP if open world mode.
-            int openWorldOption = int.Parse(Client.Options?.GetValueOrDefault("enable_open_world", "0").ToString());
-            if (openWorldOption == 1)
+            //PhoenixAki addition: open professor's door if professor's option is enabled.
+            int doorOption = int.Parse(Client.Options?.GetValueOrDefault("open_professor_door", "0").ToString());
+            if (doorOption == 1)
             {
                 Memory.Write(Addresses.APDoorAddress, (short)Addresses.APDoorValue);
             }
@@ -1644,7 +1644,7 @@ public partial class App : Application
                 rerouteWarp = true;
             }
         }
-        if(warpOption == WTWarpOptions.Any)
+        if(warpOption == WTWarpOptions.Always)
         {
             rerouteWarp = true;
         }
